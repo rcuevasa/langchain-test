@@ -8,6 +8,8 @@ The main goal is to understand LangChain chains and eventually implement agents 
 
 This repository was created following a YouTube tutorial, but adapted to use Ollama instead of OpenAI. The basic chain functionality has been successfully implemented with local models.
 
+Tutorial: [LangChain Crash Course for Beginners](https://www.youtube.com/watch?v=lG7Uxts9SXs)
+
 ## Features
 
 - **Pet Name Generator**: Uses LangChain chains to generate creative pet names based on animal type and color
