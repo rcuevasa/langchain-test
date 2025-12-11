@@ -8,6 +8,7 @@ The main goal is to understand LangChain chains and eventually implement agents 
 
 This repository was created following a YouTube tutorial, but adapted to use Ollama instead of OpenAI. The basic chain functionality has been successfully implemented with local models.
 
+Is important to highlight that the tuorial last from september 2023 and a lot has changed since then in LangChain framework, and several classes and method used then didn't work or was just deprecated.  
 Tutorial: [LangChain Crash Course for Beginners](https://www.youtube.com/watch?v=lG7Uxts9SXs)
 
 ## Features
