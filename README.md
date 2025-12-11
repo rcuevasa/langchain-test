@@ -133,11 +133,11 @@ langchain-test/
 
 ## Key Dependencies
 
+- **Ollama**: 0.6.1 (local model runner)
 - **LangChain**: 1.1.3 (main framework)
 - **langchain-ollama**: 1.0.0 (Ollama integration)
 - **Streamlit**: 1.52.1 (web UI)
 - **Wikipedia**: 1.4.0 (tool for agents)
-- **Ollama**: 0.6.1 (local model runner)
 
 ## Contributing
 

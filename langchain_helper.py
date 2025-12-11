@@ -54,7 +54,7 @@ def generate_pet_names(animal_type, color):
         base_url="http://localhost:11434",
         stream=False,
         #output_key="names"
-        #reasoning=True,
+        reasoning=True,
         format="json"
     )
     
