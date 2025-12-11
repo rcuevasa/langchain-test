@@ -1,3 +1,4 @@
 .crush/
 .env
 __pyache__/
+.venv/
