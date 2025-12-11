@@ -1,4 +1,5 @@
 .crush/
 .env
-__pyache__/
 .venv/
+__pycache__/
+AGENTS.md
