@@ -18,9 +18,10 @@ else:
 
 
 if pet_color:
+    #response = lch.generate_pet_names(animal_type, pet_color)
     response = lch.generate_pet_names(animal_type, pet_color)
     st.subheader("Here are some name suggestions for your pet:")
-    #st.text(response)
+
     for index,name in enumerate(response['names']):
         st.write(f"{index + 1}. {name}")
 
