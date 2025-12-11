@@ -67,8 +67,8 @@ def generate_pet_names(animal_type, color):
 
     return response
 
-#if __name__ == "__main__":
+if __name__ == "__main__":
 
-    #print(generate_pet_names('cat', 'black'))
+    print(generate_pet_names('cat', 'black'))
     #print(langchain_agent())
     #test_wikipedia()
