@@ -43,6 +43,8 @@ def langchain_agent():
     print(result)
 
 def generate_pet_names(animal_type, color):
+
+    # Define prompt template
     prompt_template = PromptTemplate(
         input_variables=["animal_type", "color"],
         template='I have a {color} {animal_type} pet, suggest me 10 names for my pet. Deliver all the the pet names in a json array under the key "names".',
@@ -59,10 +61,12 @@ def generate_pet_names(animal_type, color):
     )
     
     output_parser = JsonOutputParser()
+    
+    # response without chains, just using the template and model directly
+    # response = llm.generate(model="deepseek-r1", template='prompt_template', format="json")
 
-    #response = llm.generate(model="deepseek-r1", template='prompt_template', format="json")
+    # Now using chains to obtain the response
     chain = prompt_template | model | output_parser
-
     response = chain.invoke({"color": color, "animal_type": animal_type})
 
     return response
