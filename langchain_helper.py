@@ -1,10 +1,13 @@
 import ollama
+
 import wikipedia
 
 from langchain_ollama import OllamaLLM
+from langchain_ollama.chat_models import ChatOllama
 
 from langchain_core.prompts import PromptTemplate
-from langchain_core.output_parsers import JsonOutputParser
+from langchain_core.output_parsers import JsonOutputParser, StrOutputParser
+from langchain_core.prompts import SystemMessagePromptTemplate, HumanMessagePromptTemplate, ChatPromptTemplate
 
 from langchain.agents import create_agent
 from langchain.tools import tool
@@ -16,8 +19,131 @@ from datetime import date
 
 from dotenv import load_dotenv
 
+import time
+import sys
+import threading
+from typing import Callable, Any
 
-load_dotenv()
+# Not used for now
+#load_dotenv()
+
+
+def typewriter_effect(text, delay=0.03):
+    for char in text:
+        sys.stdout.write(char)
+        sys.stdout.flush()
+        time.sleep(delay)
+        
+    print()  # For a new line after the text is printed
+
+def dynamic_braille_loader(process_func: Callable, loader_text: str = "Processing", *args, **kwargs) -> Any:
+    """
+    Run a process function while displaying a braille loader animation.
+    
+    Args:
+        process_func: The function to run in the background
+        *args, **kwargs: Arguments to pass to the process function
+    
+    Returns:
+        The result of the process function
+    """
+    frames = ['⣾', '⣷', '⣯', '⣟', '⡿', '⢿', '⣻', '⣽']
+    result = None
+    error = None
+    process_running = True
+    
+    # This function will run our process in the background
+    def run_process():
+        nonlocal result, error, process_running
+        try:
+            result = process_func(*args, **kwargs)
+        except Exception as e:
+            error = e
+        finally:
+            process_running = False
+    
+    # Start the process in a separate thread
+    process_thread = threading.Thread(target=run_process)
+    process_thread.start()
+    
+    # Display the loader while the process is running
+    frame_index = 0
+    while process_running:
+        sys.stdout.write(f'\r{frames[frame_index % 8]} {loader_text}...')
+        sys.stdout.flush()
+        time.sleep(0.08)
+        frame_index += 1
+    
+    # Wait for the thread to complete
+    process_thread.join()
+    
+    # Clear the loader
+    sys.stdout.write('\r' + ' ' * 20 + '\r')
+    sys.stdout.flush()
+    
+    # Raise any errors that occurred
+    if error:
+        raise error
+    
+    return result
+
+
+def langchain_ollama_tool_agent():
+
+    llm = ChatOllama(model="qwen3")
+
+    @tool
+    def current_date() -> str:
+        """Get the current date."""
+        return str(date.today())
+
+    @tool
+    def tool_wikipedia(query: str) -> str:
+        """Search a query in wikipedia.
+        Args:
+            query: question from the user or llm agent
+        """
+        wikipedia.set_lang("en")
+        # Search for articles
+        search_results = wikipedia.summary(query)
+        return search_results
+
+
+    mytools = [current_date, tool_wikipedia]
+
+    system_message_prompt = {"role": "system", "content": "You are a helpful assistant with a bunch of tools available."}
+
+    messages = [
+                {
+                    "role": "user", 
+                    "content": "get the current date."
+                    },
+                {
+                    "role": "user",
+                    "content": "Current date president of the United States?. Use the wikipedia tool to find out."
+                    }
+            ]
+    inputs = {
+        "messages": messages
+    }
+
+    agent = create_agent(model=llm, tools=mytools, system_prompt=system_message_prompt.get("content"))
+
+    # After running your agent stream
+    final_response = None
+    for chunk in agent.stream(inputs, stream_mode="updates"):
+        #for step, data in chunk.items():
+        #    print(f"step: {step}")
+        #    print(f"content: {data['messages'][-1].content_blocks}")
+        #print(chunk)
+        if 'model' in chunk:
+            final_response = chunk['model']['messages'][0].content
+
+    # Extract the final answer
+    if final_response:
+       return final_response.strip()
+       
+
 
 def langchain_ollama_chat():
 
@@ -35,15 +161,13 @@ def langchain_ollama_chat():
         # Search for articles
         search_results = wikipedia.summary(query)
         return search_results
-
-    #mytools = [{'tool_wikipedia': tool_wikipedia}]
     
     available_tools = {
         'tool_wikipedia': tool_wikipedia,
         'current_date': current_date,
     }
 
-    mytools = [tool_wikipedia, current_date]
+    #mytools = [tool_wikipedia, current_date]
     
     #[
     #    {
@@ -173,10 +297,19 @@ def generate_pet_names(animal_type, color):
 
 if __name__ == "__main__":
 
-    print("LangChain Chain Results:")
-    print(generate_pet_names('cat', 'black'))
+    # Test LangChain with Ollama tool agent
+    #print("\nLangChain Ollama and react agent Tool Results:")
+    #langchain_ollama_tool_agent()
 
-    print("\nLangChain Ollama Chat Tool Results:")
-    print(langchain_ollama_chat())
+    final = dynamic_braille_loader(langchain_ollama_tool_agent, "Running LangChain Ollama Tool Agent")
+    typewriter_effect("Final result: " + final.strip(), delay=0.02)
+
+    # Test LangChain with Ollama direct chat
+    #print("LangChain Chain Results:")
+    #print(generate_pet_names('cat', 'black'))
+
+    #print("\nLangChain Ollama Chat Tool Results:")
+    #print(langchain_ollama_chat())
+    
     #print(langchain_agent())
     #test_wikipedia()
