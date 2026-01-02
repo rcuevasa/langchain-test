@@ -111,13 +111,17 @@ def langchain_ollama_tool_agent():
 
     mytools = [current_date, tool_wikipedia]
 
-    system_message_prompt = {"role": "system", "content": "You are a helpful assistant with a bunch of tools available."}
+    system_message_prompt = {"role": "system", "content": """You are a helpful assistant with a bunch of tools available. 
+                    Elaborate your answers considering the information received from tools, do not
+                    hypothesize or make up answers if you don't have enough information.
+                    Finally, you must be aware of the current date.
+                    """}
 
     messages = [
-                {
-                    "role": "user", 
-                    "content": "get the current date."
-                    },
+                #{
+                #    "role": "user", 
+                #    "content": "get the current date."
+                #    },
                 {
                     "role": "user",
                     "content": "Current date president of the United States?. Use the wikipedia tool to find out."
@@ -167,26 +171,7 @@ def langchain_ollama_chat():
         'current_date': current_date,
     }
 
-    #mytools = [tool_wikipedia, current_date]
-    
-    #[
-    #    {
-    #        "type": "function",
-    ##        "function": {
-    ##            "name": "tool_wikipedia",
-    #            "description": "Search a query in wikipedia.",
-    #            "parameters": {
-    #                "type": "object",
-    #                "properties": {
-    ###                       "type": "string",
-    #                        "description": "question from the user or llm agent",
-    #                        },
-    #                },
-    #                "required": ["query"],
-    #            },
-    #        },
-    #    }
-    #]
+    mytools = [tool_wikipedia, current_date]
 
     messages = [
                 {
@@ -212,23 +197,23 @@ def langchain_ollama_chat():
         #think=True,  # Set the think level to 'medium' for better reasoning
         #stream=False
         )
-    print('Model response:', result)
-    print()
+    #print('Model response:', result)
+    #print()
 
     if result.message.tool_calls:
         # There may be multiple tool calls in the response
         for tool in result.message.tool_calls:
             # Ensure the function is available, and then call it
             if function_to_call := available_tools.get(tool.function.name):
-                print('Calling function:', tool.function.name)
-                print('Arguments:', tool.function.arguments)
+                #print('Calling function:', tool.function.name)
+                #print('Arguments:', tool.function.arguments)
                 output = function_to_call(**tool.function.arguments)
-                print('Function output:', output)
+                #print('Function output:', output)
                 # Add the function response to messages for the model to use
                 messages.append(result.message)
                 messages.append({'role': 'tool', 'content': str(output), 'tool_name': tool.function.name})
             else:
-                print('Function', tool.function.name, 'not found')
+                return "Function " + tool.function.name + " not found"
 
     # Only needed to chat with the model using the tool call results
     if result.message.tool_calls:
@@ -237,10 +222,10 @@ def langchain_ollama_chat():
         #messages.append({'role': 'tool', 'content': str(output), 'tool_name': tool.function.name})
         # Get final response from model with function outputs
         final_response = chat('qwen3', messages=messages)
-        print('\nFinal response:', final_response.message.content)
+        return final_response.message.content.strip()
 
     else:
-        print('No tool calls returned from model')
+       return 'No tool calls returned from model'
         
     
 def langchain_ollama_agent():
@@ -305,11 +290,12 @@ if __name__ == "__main__":
     typewriter_effect("Final result: " + final.strip(), delay=0.02)
 
     # Test LangChain with Ollama direct chat
-    #print("LangChain Chain Results:")
-    #print(generate_pet_names('cat', 'black'))
+    #final = dynamic_braille_loader(langchain_ollama_chat, "Running LangChain Ollama Chat Tool Results")
+    #typewriter_effect("Final result: " + final.strip(), delay=0.02)
 
-    #print("\nLangChain Ollama Chat Tool Results:")
-    #print(langchain_ollama_chat())
+    # Testing langchain chains with ollama generate llm (OllamaLLM)
+    #final = dynamic_braille_loader(generate_pet_names, "Generating Pet Names", 'dog', 'brown')
+    #typewriter_effect("Generated pet names: " + str(final), delay=0.02)
     
     #print(langchain_agent())
     #test_wikipedia()
